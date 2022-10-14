@@ -9,7 +9,6 @@
 
         <!-- Fonts -->
         <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
         <!-- Styles -->
         <style>
@@ -31,27 +30,47 @@
             }
         </style>
     </head>
-    <body class="container mt-4">
-        <h2 class="text-center">{{  @$fileName }}</h2>
-        <h2 class="text-center">CSV file Upload</h2>
+    <body class="antialiased">
 
-      <form action="{{ route('spreadsheet.csv.store') }}" method="POST" id="upload-file" enctype="multipart/form-data">
-        @csrf
-          <div class="row">
+        <div class="container">
+            <div class="row">
+                <div id="object"></div>
+            </div>
+        </div>
+        <script>
 
-              <div class="col-md-12">
-                  <div class="form-group">
-                      <input type="file" name="file" placeholder="Choose file" id="file">
-                        @error('file')
-                        <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
-                        @enderror
-                  </div>
-              </div>
+            let changed = function(instance, cell, x, y, value) {
+                    console.log( mySpreadsheet.getJson());
 
-              <div class="col-md-12">
-                  <button type="submit" class="btn btn-primary" id="submit">Submit</button>
-              </div>
-          </div>
-      </form>
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+
+                    $.ajax({
+                        url: "{{ route('test.store') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: JSON.stringify(mySpreadsheet.getJson()),
+                        contentType: "application/json; charset=utf-8",
+                        traditional: true,
+                        success: data => {
+                            console.log("File saved go to '/spreadsheet'.");
+                        }
+                    });
+
+            }
+            mySpreadsheet = jexcel(document.getElementById('object'), {
+                url:"{{ asset('storage/spreadsheet/v1/ConcretreCubeReport.json') }}",
+                rowResize:true,
+                columnDrag:true,
+                tableWidth:"1000px",
+                tableHeight:"50px",
+                defaultColWidth: 125,
+                allowExport:true,
+                onchange: changed,
+            });
+        </script>
     </body>
 </html>

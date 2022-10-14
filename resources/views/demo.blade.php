@@ -9,7 +9,6 @@
 
         <!-- Fonts -->
         <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
         <!-- Styles -->
         <style>
@@ -31,27 +30,25 @@
             }
         </style>
     </head>
-    <body class="container mt-4">
-        <h2 class="text-center">{{  @$fileName }}</h2>
-        <h2 class="text-center">CSV file Upload</h2>
+    <body class="antialiased">
 
-      <form action="{{ route('spreadsheet.csv.store') }}" method="POST" id="upload-file" enctype="multipart/form-data">
-        @csrf
-          <div class="row">
+        <div id="spreadsheet"></div>
 
-              <div class="col-md-12">
-                  <div class="form-group">
-                      <input type="file" name="file" placeholder="Choose file" id="file">
-                        @error('file')
-                        <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
-                        @enderror
-                  </div>
-              </div>
+        <script>
+            var base_url = window.location.origin;
+            var file_path = '/storage/master/v1/'+ @json($fileName) +'.json';
+            var path = base_url+file_path;
 
-              <div class="col-md-12">
-                  <button type="submit" class="btn btn-primary" id="submit">Submit</button>
-              </div>
-          </div>
-      </form>
+            mySpreadsheet = jexcel(document.getElementById('spreadsheet'), {
+                url: path,
+                csvHeaders:true,
+                rowResize:true,
+                columnDrag:true,
+                tableWidth:"1000px",
+                tableHeight:"50px",
+                defaultColWidth: 100,
+                allowExport:true,
+            });
+        </script>
     </body>
 </html>

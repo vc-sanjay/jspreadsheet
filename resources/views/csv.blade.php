@@ -9,7 +9,6 @@
 
         <!-- Fonts -->
         <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
         <!-- Styles -->
         <style>
@@ -31,27 +30,77 @@
             }
         </style>
     </head>
-    <body class="container mt-4">
-        <h2 class="text-center">{{  @$fileName }}</h2>
-        <h2 class="text-center">CSV file Upload</h2>
+    <body class="antialiased">
 
-      <form action="{{ route('spreadsheet.csv.store') }}" method="POST" id="upload-file" enctype="multipart/form-data">
-        @csrf
-          <div class="row">
+        <button id="save" type="submit">Save</button>
+        <div id="log"></div>
+        <div id="spreadsheet"></div>
+        @php
+            $file = 'afas';
+            $storagePath = storage_path();
+        @endphp
+        <script>
 
-              <div class="col-md-12">
-                  <div class="form-group">
-                      <input type="file" name="file" placeholder="Choose file" id="file">
-                        @error('file')
-                        <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
-                        @enderror
-                  </div>
-              </div>
+            var base_url = window.location.origin;
+            var file_path = '/storage/master/v1/'+ @json($fileName) +'.csv';
+            var path = base_url+file_path;
 
-              <div class="col-md-12">
-                  <button type="submit" class="btn btn-primary" id="submit">Submit</button>
-              </div>
-          </div>
-      </form>
+
+
+            var loaded = function(instance) {
+                $('#log').append('New data is loaded');
+
+                var json_loaded_data =  mySpreadsheet.getJson();
+
+                $('#save').on('click', function() {
+                    // console.log(json_loaded_data)
+                });
+
+            }
+
+            let changed = function(instance, cell, x, y, value) {
+                    console.log( JSON.stringify(mySpreadsheet.getJson()));
+
+                    // var json_changed_data = mySpreadsheet.getJson();
+
+                    $('#save').on('click', function() {
+
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+
+                        $.ajax({
+                            url: "{{ route('test.store') }}",
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                json_data: JSON.stringify(mySpreadsheet.getJson()),
+                                file_name : @json($fileName)
+                            },
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                            traditional: true,
+                            success: data => {
+                                console.log("File saved go to '/spreadsheet'.");
+                            }
+                        });
+                    });
+
+            }
+
+            mySpreadsheet = jexcel(document.getElementById('spreadsheet'), {
+                csv: path,
+                csvHeaders:true,
+                rowResize:true,
+                columnDrag:true,
+                tableWidth:"1000px",
+                tableHeight:"50px",
+                defaultColWidth: 100,
+                allowExport:true,
+                onchange: changed,
+                onload: loaded,
+            });
+        </script>
     </body>
 </html>
